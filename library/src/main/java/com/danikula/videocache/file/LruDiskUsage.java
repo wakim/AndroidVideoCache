@@ -52,7 +52,7 @@ abstract class LruDiskUsage implements DiskUsage {
                     if(fileDeleteListener != null){
                         fileDeleteListener.onFileDeleted(file.getName());
                     }
-                    Log.i(LOG_TAG, "Cache file " + file + " is deleted because it exceeds cache limit");
+                    Log.i(LOG_TAG, "Cache file " + file + " was deleted because it exceeds cache limit");
                 } else {
                     Log.e(LOG_TAG, "Error deleting file " + file + " for trimming cache");
                 }
