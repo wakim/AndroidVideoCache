@@ -103,25 +103,21 @@ public class HttpUrlSource implements Source {
 
     private void fetchContentInfo() throws ProxyCacheException {
         Log.d(LOG_TAG, "Read content info from " + url);
-        HttpURLConnection urlConnection = null;
-        InputStream inputStream = null;
         try {
-            urlConnection = openConnection(0, 10000);
+            HttpURLConnection urlConnection = openConnection(0, 10000, true);
+
             length = urlConnection.getContentLength();
             mime = urlConnection.getContentType();
-            inputStream = urlConnection.getInputStream();
             Log.i(LOG_TAG, "Content info for `" + url + "`: mime: " + mime + ", content-length: " + length);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error fetching info from " + url, e);
-        } finally {
-            ProxyCacheUtils.close(inputStream);
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
         }
     }
-
     private HttpURLConnection openConnection(int offset, int timeout) throws IOException, ProxyCacheException {
+        return openConnection(offset, timeout, false);
+    }
+
+    private HttpURLConnection openConnection(int offset, int timeout, boolean headerOnly) throws IOException, ProxyCacheException {
         HttpURLConnection connection;
         boolean redirected;
         int redirectCount = 0;
@@ -129,6 +125,11 @@ public class HttpUrlSource implements Source {
         do {
             Log.d(LOG_TAG, "Open connection " + (offset > 0 ? " with offset " + offset : "") + " to " + url);
             connection = (HttpURLConnection) new URL(url).openConnection();
+
+            if (headerOnly) {
+                connection.setRequestMethod("HEAD");
+            }
+
             if (offset > 0) {
                 connection.setRequestProperty("Range", "bytes=" + offset + "-");
             }
