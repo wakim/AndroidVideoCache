@@ -24,6 +24,7 @@
         <activity android:name=".MultipleVideosActivity_" />
         <activity android:name=".VideoGalleryActivity_" />
         <activity android:name=".SharedCacheActivity_" />
+        <activity android:name=".DownloadFileActivity_" />
     </application>
 
 </manifest>

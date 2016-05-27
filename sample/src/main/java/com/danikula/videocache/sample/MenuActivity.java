@@ -36,7 +36,8 @@ public class MenuActivity extends FragmentActivity {
                 new ListEntry("Single Video", SingleVideoActivity_.class),
                 new ListEntry("Multiple Videos", MultipleVideosActivity_.class),
                 new ListEntry("Video Gallery with pre-caching", VideoGalleryActivity_.class),
-                new ListEntry("Shared Cache", SharedCacheActivity_.class)
+                new ListEntry("Shared Cache", SharedCacheActivity_.class),
+                new ListEntry("Download file", DownloadFileActivity_.class)
         );
     }
 
