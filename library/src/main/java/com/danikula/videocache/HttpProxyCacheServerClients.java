@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.danikula.videocache.Preconditions.checkNotNull;
@@ -51,8 +52,17 @@ final class HttpProxyCacheServerClients {
 
     private synchronized void finishProcessRequest() {
         if (clientsCount.decrementAndGet() <= 0) {
-            proxyCache.shutdown();
-            proxyCache = null;
+            //Give it some time to live in case something else is going to try and use it right away.
+            // ExoPlayer tries to load the file multiple times right off the bat.
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (clientsCount.get() <= 0 && proxyCache != null) {
+                        proxyCache.shutdown();
+                        proxyCache = null;
+                    }
+                }
+            }, TimeUnit.SECONDS.toMillis(10));
         }
     }
 
