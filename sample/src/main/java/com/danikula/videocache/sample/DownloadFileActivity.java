@@ -26,7 +26,7 @@ import java.net.URL;
 public class DownloadFileActivity extends Activity implements CacheListener {
     private final static String TAG = DownloadFileActivity.class.getName();
 
-    private final static String DOWNLOAD_URL = "http://y-sf.smule.com/y6/sing/performance/renvideo/cf/4a/f70993a0-907f-4dd8-a5e1-a5329edaaa6e.mp4";
+    private final static String DOWNLOAD_URL = "http://html5demos.com/assets/dizzy.mp4";
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
