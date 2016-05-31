@@ -30,10 +30,13 @@ final class HttpProxyCacheServerClients {
     private final CacheListener uiCacheListener;
     private final Config config;
 
+    private final Handler shutdownHandler;
+
     public HttpProxyCacheServerClients(String url, Config config) {
         this.url = checkNotNull(url);
         this.config = checkNotNull(config);
         this.uiCacheListener = new UiListenerHandler(url, listeners);
+        this.shutdownHandler = new Handler(Looper.getMainLooper());
     }
 
     public void processRequest(GetRequest request, Socket socket) throws ProxyCacheException, IOException {
@@ -47,6 +50,12 @@ final class HttpProxyCacheServerClients {
     }
 
     private synchronized void startProcessRequest() throws ProxyCacheException {
+        try {
+            shutdownHandler.removeCallbacks(shutdownRunnable);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         proxyCache = proxyCache == null ? newHttpProxyCache() : proxyCache;
     }
 
@@ -54,17 +63,20 @@ final class HttpProxyCacheServerClients {
         if (clientsCount.decrementAndGet() <= 0) {
             //Give it some time to live in case something else is going to try and use it right away.
             // ExoPlayer tries to load the file multiple times right off the bat.
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (clientsCount.get() <= 0 && proxyCache != null) {
-                        proxyCache.shutdown();
-                        proxyCache = null;
-                    }
-                }
-            }, TimeUnit.SECONDS.toMillis(10));
+            // And this thing just holds stuff in memory, so I think it's fine to stay around for a while.
+            shutdownHandler.postDelayed(shutdownRunnable, config.proxyCacheMemoryTTL);
         }
     }
+
+    private Runnable shutdownRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (clientsCount.get() <= 0 && proxyCache != null) {
+                proxyCache.shutdown();
+                proxyCache = null;
+            }
+        }
+    };
 
     public void registerCacheListener(CacheListener cacheListener) {
         listeners.add(cacheListener);

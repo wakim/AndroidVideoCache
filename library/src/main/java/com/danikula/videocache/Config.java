@@ -15,11 +15,13 @@ class Config {
     public final File cacheRoot;
     public final FileNameGenerator fileNameGenerator;
     public final DiskUsage diskUsage;
+    public final int proxyCacheMemoryTTL;
 
-    Config(File cacheRoot, FileNameGenerator fileNameGenerator, DiskUsage diskUsage) {
+    Config(File cacheRoot, FileNameGenerator fileNameGenerator, DiskUsage diskUsage, int proxyCacheMemoryTTL) {
         this.cacheRoot = cacheRoot;
         this.fileNameGenerator = fileNameGenerator;
         this.diskUsage = diskUsage;
+        this.proxyCacheMemoryTTL = proxyCacheMemoryTTL;
     }
 
     File generateCacheFile(String url) {

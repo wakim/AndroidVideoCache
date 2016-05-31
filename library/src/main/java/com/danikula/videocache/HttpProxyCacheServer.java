@@ -276,6 +276,8 @@ public class HttpProxyCacheServer {
             Log.d(LOG_TAG, "Closing socket… Socket is closed by client.");
         } catch (ProxyCacheException | IOException e) {
             onError(new ProxyCacheException("Error processing request", e));
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Something went whack", e);
         } finally {
             releaseSocket(socket);
             Log.d(LOG_TAG, "Opened connections: " + getClientsCount());
@@ -401,11 +403,13 @@ public class HttpProxyCacheServer {
         private FileNameGenerator fileNameGenerator;
         private DiskUsage diskUsage;
         private FileDeleteListener fileDeleteListener;
+        private int proxyCacheMemoryTTL;
 
         public Builder(Context context) {
             this.cacheRoot = StorageUtils.getIndividualCacheDirectory(context);
             this.diskUsage = new TotalSizeLruDiskUsage(DEFAULT_MAX_SIZE);
             this.fileNameGenerator = new Md5FileNameGenerator();
+            this.proxyCacheMemoryTTL = 30 * 1000;
         }
 
         /**
@@ -477,6 +481,17 @@ public class HttpProxyCacheServer {
         }
 
         /**
+         * Sets the time that metadata for a particular url will be kept in memory
+         *
+         * @param proxyCacheMemoryTTL The time to stay in memory, in milliseconds
+         * @return a builder
+         */
+        public Builder proxyCacheMemoryTTL(int proxyCacheMemoryTTL) {
+            this.proxyCacheMemoryTTL = proxyCacheMemoryTTL;
+            return this;
+        }
+
+        /**
          * Builds new instance of {@link HttpProxyCacheServer}.
          *
          * @return proxy cache. Only single instance should be used across whole app.
@@ -490,7 +505,7 @@ public class HttpProxyCacheServer {
         }
 
         private Config buildConfig() {
-            return new Config(cacheRoot, fileNameGenerator, diskUsage);
+            return new Config(cacheRoot, fileNameGenerator, diskUsage, proxyCacheMemoryTTL);
         }
 
     }
