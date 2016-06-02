@@ -1,7 +1,9 @@
 package com.danikula.videocache.file;
 
+import android.util.Log;
 import com.danikula.videocache.Cache;
 import com.danikula.videocache.ProxyCacheException;
+import com.danikula.videocache.ProxyCacheUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +19,7 @@ public class FileCache implements Cache {
     private static final String TEMP_POSTFIX = ".download";
 
     private final DiskUsage diskUsage;
+    private File originalFile;
     public File file;
     private RandomAccessFile dataFile;
 
@@ -30,14 +33,34 @@ public class FileCache implements Cache {
                 throw new NullPointerException();
             }
             this.diskUsage = diskUsage;
-            File directory = file.getParentFile();
-            Files.makeDir(directory);
-            boolean completed = file.exists();
-            this.file = completed ? file : new File(file.getParentFile(), file.getName() + TEMP_POSTFIX);
-            this.dataFile = new RandomAccessFile(this.file, completed ? "r" : "rw");
+
+            originalFile = file;
+
+            resetFile();
         } catch (IOException e) {
             throw new ProxyCacheException("Error using file " + file + " as disc cache", e);
         }
+    }
+
+    /**
+     * The file could get deleted at any time. Either by our LRU cache, or by Android clearing up the file system. Be prepared.
+     */
+    private synchronized void resetFile() throws IOException {
+        File directory = originalFile.getParentFile();
+        Files.makeDir(directory);
+        boolean completed = originalFile.exists();
+        this.file = completed ? originalFile : new File(originalFile.getParentFile(), originalFile.getName() + TEMP_POSTFIX);
+
+        diskUsage.touch(file);
+        if (this.dataFile != null) {
+            try {
+                this.dataFile.close();
+            } catch (IOException ignore) {
+
+            }
+        }
+
+        this.dataFile = new RandomAccessFile(this.file, completed ? "r" : "rw");
     }
 
     @Override
@@ -45,7 +68,12 @@ public class FileCache implements Cache {
         try {
             return (int) dataFile.length();
         } catch (IOException e) {
-            throw new ProxyCacheException("Error reading length of file " + file, e);
+            try {
+                resetFile();
+                return 0;
+            } catch (IOException e2) {
+                throw new ProxyCacheException("Error reading length of file " + file, e);
+            }
         }
     }
 
@@ -94,9 +122,11 @@ public class FileCache implements Cache {
         String fileName = file.getName().substring(0, file.getName().length() - TEMP_POSTFIX.length());
         File completedFile = new File(file.getParentFile(), fileName);
         boolean renamed = file.renameTo(completedFile);
-        if (!renamed) {
+
+        if (!renamed && !completedFile.exists()) {
             throw new ProxyCacheException("Error renaming file " + file + " to " + completedFile + " for completion!");
         }
+
         file = completedFile;
         try {
             dataFile = new RandomAccessFile(file, "r");
@@ -107,7 +137,12 @@ public class FileCache implements Cache {
 
     @Override
     public synchronized boolean isCompleted() {
-        return !isTempFile(file);
+        try {
+            return !isTempFile(file) && dataFile.length() > 0;
+        } catch (IOException e) {
+            Log.d(ProxyCacheUtils.LOG_TAG, "Error reading file length", e);
+            return false;
+        }
     }
 
     /**

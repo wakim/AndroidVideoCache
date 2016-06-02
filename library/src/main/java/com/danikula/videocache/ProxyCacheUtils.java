@@ -23,7 +23,7 @@ import static com.danikula.videocache.Preconditions.checkNotNull;
  */
 public class ProxyCacheUtils {
 
-    static final String LOG_TAG = "ProxyCache";
+    static public final String LOG_TAG = "ProxyCache";
     static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
     static final int MAX_ARRAY_PREVIEW = 16;
 

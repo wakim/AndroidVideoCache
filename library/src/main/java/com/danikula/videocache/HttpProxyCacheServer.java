@@ -261,6 +261,7 @@ public class HttpProxyCacheServer {
 
     private void processSocket(Socket socket) {
         try {
+            Log.i(LOG_TAG, "processSocket");
             GetRequest request = GetRequest.read(socket.getInputStream());
             Log.i(LOG_TAG, "Request to cache proxy:" + request);
             String url = ProxyCacheUtils.decode(request.uri);
