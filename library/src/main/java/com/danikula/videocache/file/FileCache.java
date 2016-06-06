@@ -70,10 +70,11 @@ public class FileCache implements Cache {
         } catch (IOException e) {
             try {
                 resetFile();
-                return 0;
-            } catch (IOException e2) {
-                throw new ProxyCacheException("Error reading length of file " + file, e);
+            } catch (IOException ignored) {
+
             }
+
+            throw new ProxyCacheException("Error reading length of file " + file, e);
         }
     }
 
