@@ -71,12 +71,16 @@ final class HttpProxyCacheServerClients {
     private Runnable shutdownRunnable = new Runnable() {
         @Override
         public void run() {
-            if (clientsCount.get() <= 0 && proxyCache != null) {
-                proxyCache.shutdown();
-                proxyCache = null;
-            }
+            tryShutdownProxy();
         }
     };
+
+    private synchronized void tryShutdownProxy() {
+        if (clientsCount.get() <= 0 && proxyCache != null) {
+            proxyCache.shutdown();
+            proxyCache = null;
+        }
+    }
 
     public void registerCacheListener(CacheListener cacheListener) {
         listeners.add(cacheListener);

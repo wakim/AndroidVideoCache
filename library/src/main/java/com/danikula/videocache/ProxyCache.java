@@ -59,7 +59,7 @@ class ProxyCache {
         }
     }
 
-    public void shutdown() {
+    public synchronized void shutdown() {
         synchronized (stopLock) {
             Log.d(LOG_TAG, "Shutdown proxy for " + source);
             try {
