@@ -27,6 +27,7 @@ public class HttpUrlSource implements Source {
 
     private static final int MAX_REDIRECTS = 5;
     public final String url;
+    public static int networkTimeout = 5000;
     private HttpURLConnection connection;
     private InputStream inputStream;
     private volatile int length = Integer.MIN_VALUE;
@@ -58,7 +59,7 @@ public class HttpUrlSource implements Source {
     @Override
     public void open(int offset) throws ProxyCacheException {
         try {
-            connection = openConnection(offset, -1);
+            connection = openConnection(offset);
             mime = connection.getContentType();
             inputStream = new BufferedInputStream(connection.getInputStream(), DEFAULT_BUFFER_SIZE);
             length = readSourceAvailableBytes(connection, offset, connection.getResponseCode());
@@ -104,7 +105,7 @@ public class HttpUrlSource implements Source {
     private void fetchContentInfo() throws ProxyCacheException {
         Log.d(LOG_TAG, "Read content info from " + url);
         try {
-            HttpURLConnection urlConnection = openConnection(0, 10000, true);
+            HttpURLConnection urlConnection = openConnection(0, true);
 
             length = urlConnection.getContentLength();
             mime = urlConnection.getContentType();
@@ -113,11 +114,11 @@ public class HttpUrlSource implements Source {
             Log.e(LOG_TAG, "Error fetching info from " + url, e);
         }
     }
-    private HttpURLConnection openConnection(int offset, int timeout) throws IOException, ProxyCacheException {
-        return openConnection(offset, timeout, false);
+    private HttpURLConnection openConnection(int offset) throws IOException, ProxyCacheException {
+        return openConnection(offset, false);
     }
 
-    private HttpURLConnection openConnection(int offset, int timeout, boolean headerOnly) throws IOException, ProxyCacheException {
+    private HttpURLConnection openConnection(int offset, boolean headerOnly) throws IOException, ProxyCacheException {
         HttpURLConnection connection;
         boolean redirected;
         int redirectCount = 0;
@@ -133,10 +134,10 @@ public class HttpUrlSource implements Source {
             if (offset > 0) {
                 connection.setRequestProperty("Range", "bytes=" + offset + "-");
             }
-            if (timeout > 0) {
-                connection.setConnectTimeout(timeout);
-                connection.setReadTimeout(timeout);
-            }
+
+            connection.setConnectTimeout(networkTimeout);
+            connection.setReadTimeout(networkTimeout);
+
             int code = connection.getResponseCode();
             redirected = code == HTTP_MOVED_PERM || code == HTTP_MOVED_TEMP || code == HTTP_SEE_OTHER;
             if (redirected) {

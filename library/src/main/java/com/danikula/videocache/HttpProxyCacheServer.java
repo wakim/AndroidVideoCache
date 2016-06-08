@@ -89,6 +89,10 @@ public class HttpProxyCacheServer {
             CountDownLatch startSignal = new CountDownLatch(1);
             this.waitConnectionThread = new Thread(new WaitRequestsRunnable(startSignal));
             this.waitConnectionThread.start();
+
+            //A little hacky, but I don't want to pass the Config everywhere.
+            HttpUrlSource.networkTimeout = config.networkTimeout;
+
             startSignal.await(); // freeze thread, wait for server starts
             Log.i(LOG_TAG, "Proxy cache server started. Ping it...");
             makeSureServerWorks();
@@ -399,18 +403,22 @@ public class HttpProxyCacheServer {
     public static final class Builder {
 
         private static final long DEFAULT_MAX_SIZE = 512 * 1024 * 1024;
+        private static final int PROXY_CACHE_MEMORY_TTL = 30 * 1000;
+        private static final int NETWORK_TIMEOUT = 5000;
 
         private File cacheRoot;
         private FileNameGenerator fileNameGenerator;
         private DiskUsage diskUsage;
         private FileDeleteListener fileDeleteListener;
         private int proxyCacheMemoryTTL;
+        private int networkTimeout;
 
         public Builder(Context context) {
             this.cacheRoot = StorageUtils.getIndividualCacheDirectory(context);
             this.diskUsage = new TotalSizeLruDiskUsage(DEFAULT_MAX_SIZE);
             this.fileNameGenerator = new Md5FileNameGenerator();
-            this.proxyCacheMemoryTTL = 30 * 1000;
+            this.proxyCacheMemoryTTL = PROXY_CACHE_MEMORY_TTL;
+            this.networkTimeout = NETWORK_TIMEOUT;
         }
 
         /**
@@ -493,6 +501,17 @@ public class HttpProxyCacheServer {
         }
 
         /**
+         * Set the network timeout for all connections
+         *
+         * @param networkTimeout timeout in milliseconds
+         * @return a builder
+         */
+        public Builder networkTimeout(int networkTimeout) {
+            this.networkTimeout = networkTimeout;
+            return this;
+        }
+
+        /**
          * Builds new instance of {@link HttpProxyCacheServer}.
          *
          * @return proxy cache. Only single instance should be used across whole app.
@@ -506,7 +525,7 @@ public class HttpProxyCacheServer {
         }
 
         private Config buildConfig() {
-            return new Config(cacheRoot, fileNameGenerator, diskUsage, proxyCacheMemoryTTL);
+            return new Config(cacheRoot, fileNameGenerator, diskUsage, proxyCacheMemoryTTL, networkTimeout);
         }
 
     }
