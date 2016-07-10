@@ -5,13 +5,13 @@ repositories {
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion '22.0.1'
+    compileSdkVersion 24
+    buildToolsVersion '24.0.0'
 
     defaultConfig {
         applicationId 'com.danikula.proxycache.test'
         minSdkVersion 16
-        targetSdkVersion 22
+        targetSdkVersion 24
         versionCode 1
         versionName '0.1'
     }
