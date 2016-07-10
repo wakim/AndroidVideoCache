@@ -242,6 +242,17 @@ public class HttpProxyCacheServer {
         }
     }
 
+    public void shutdownClient(String url) {
+        synchronized (clientsLock) {
+            HttpProxyCacheServerClients client = clientsMap.get(url);
+
+            if (client != null) {
+                client.shutdown();
+                clientsMap.remove(url);
+            }
+        }
+    }
+
     private void shutdownClients() {
         synchronized (clientsLock) {
             for (HttpProxyCacheServerClients clients : clientsMap.values()) {
