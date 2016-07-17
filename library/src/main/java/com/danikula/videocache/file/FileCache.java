@@ -1,13 +1,13 @@
 package com.danikula.videocache.file;
 
-import android.util.Log;
 import com.danikula.videocache.Cache;
+import com.danikula.videocache.Logger;
 import com.danikula.videocache.ProxyCacheException;
-import com.danikula.videocache.ProxyCacheUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Locale;
 
 /**
  * {@link Cache} that uses file for storing data.
@@ -85,7 +85,7 @@ public class FileCache implements Cache {
             return dataFile.read(buffer, 0, length);
         } catch (IOException e) {
             String format = "Error reading %d bytes with offset %d from file[%d bytes] to buffer[%d bytes]";
-            throw new ProxyCacheException(String.format(format, length, offset, available(), buffer.length), e);
+            throw new ProxyCacheException(String.format(Locale.getDefault(), format, length, offset, available(), buffer.length), e);
         }
     }
 
@@ -99,7 +99,7 @@ public class FileCache implements Cache {
             dataFile.write(data, 0, length);
         } catch (IOException e) {
             String format = "Error writing %d bytes to %s from buffer with size %d";
-            throw new ProxyCacheException(String.format(format, length, dataFile, data.length), e);
+            throw new ProxyCacheException(String.format(Locale.getDefault(), format, length, dataFile, data.length), e);
         }
     }
 
@@ -141,7 +141,7 @@ public class FileCache implements Cache {
         try {
             return !isTempFile(file) && dataFile.length() > 0;
         } catch (IOException e) {
-            Log.d(ProxyCacheUtils.LOG_TAG, "Error reading file length", e);
+            Logger.d("Error reading file length", e);
             return false;
         }
     }

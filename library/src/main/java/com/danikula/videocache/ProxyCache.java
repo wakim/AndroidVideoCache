@@ -1,11 +1,8 @@
 package com.danikula.videocache;
 
-import android.util.Log;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.danikula.videocache.Preconditions.checkNotNull;
-import static com.danikula.videocache.ProxyCacheUtils.LOG_TAG;
 
 /**
  * Proxy for {@link Source} with caching support ({@link Cache}).
@@ -61,7 +58,7 @@ class ProxyCache {
 
     public synchronized void shutdown() {
         synchronized (stopLock) {
-            Log.d(LOG_TAG, "Shutdown proxy for " + source);
+            Logger.d("Shutdown proxy for " + source);
             try {
                 stopped = true;
                 if (sourceReaderThread != null) {
@@ -166,9 +163,9 @@ class ProxyCache {
     protected final void onError(final Throwable e) {
         boolean interruption = e instanceof InterruptedProxyCacheException;
         if (interruption) {
-            Log.d(LOG_TAG, "ProxyCache is interrupted");
+            Logger.d("ProxyCache is interrupted");
         } else {
-            Log.e(LOG_TAG, "ProxyCache error", e);
+            Logger.e("ProxyCache error", e);
         }
     }
 

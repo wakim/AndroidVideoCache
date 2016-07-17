@@ -1,7 +1,6 @@
 package com.danikula.videocache;
 
 import android.text.TextUtils;
-import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import java.io.Closeable;
@@ -23,7 +22,6 @@ import static com.danikula.videocache.Preconditions.checkNotNull;
  */
 public class ProxyCacheUtils {
 
-    static public final String LOG_TAG = "ProxyCache";
     static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
     static final int MAX_ARRAY_PREVIEW = 16;
 
@@ -70,7 +68,7 @@ public class ProxyCacheUtils {
             try {
                 closeable.close();
             } catch (IOException e) {
-                Log.e(LOG_TAG, "Error closing resource", e);
+                Logger.e("Error closing resource", e);
             }
         }
     }

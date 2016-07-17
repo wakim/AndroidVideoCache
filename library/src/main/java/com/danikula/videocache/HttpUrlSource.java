@@ -1,7 +1,6 @@
 package com.danikula.videocache;
 
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -11,7 +10,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import static com.danikula.videocache.ProxyCacheUtils.DEFAULT_BUFFER_SIZE;
-import static com.danikula.videocache.ProxyCacheUtils.LOG_TAG;
 import static java.net.HttpURLConnection.HTTP_MOVED_PERM;
 import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
 import static java.net.HttpURLConnection.HTTP_OK;
@@ -103,15 +101,15 @@ public class HttpUrlSource implements Source {
     }
 
     private void fetchContentInfo() throws ProxyCacheException {
-        Log.d(LOG_TAG, "Read content info from " + url);
+        Logger.d("Read content info from " + url);
         try {
             HttpURLConnection urlConnection = openConnection(0, true);
 
             length = urlConnection.getContentLength();
             mime = urlConnection.getContentType();
-            Log.i(LOG_TAG, "Content info for `" + url + "`: mime: " + mime + ", content-length: " + length);
+            Logger.i("Content info for `" + url + "`: mime: " + mime + ", content-length: " + length);
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Error fetching info from " + url, e);
+            Logger.e("Error fetching info from " + url, e);
         }
     }
     private HttpURLConnection openConnection(int offset) throws IOException, ProxyCacheException {
@@ -124,7 +122,7 @@ public class HttpUrlSource implements Source {
         int redirectCount = 0;
         String url = this.url;
         do {
-            Log.d(LOG_TAG, "Open connection " + (offset > 0 ? " with offset " + offset : "") + " to " + url);
+            Logger.d("Open connection " + (offset > 0 ? " with offset " + offset : "") + " to " + url);
             connection = (HttpURLConnection) new URL(url).openConnection();
 
             if (headerOnly) {

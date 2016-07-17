@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.danikula.videocache.Preconditions.checkNotNull;
@@ -53,7 +52,7 @@ final class HttpProxyCacheServerClients {
         try {
             shutdownHandler.removeCallbacks(shutdownRunnable);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.e("Start Process Request", e);
         }
 
         proxyCache = proxyCache == null ? newHttpProxyCache() : proxyCache;
