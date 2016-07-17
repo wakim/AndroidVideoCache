@@ -84,7 +84,7 @@ public class ProxyCacheUtils {
     }
 
     private static String bytesToHexString(byte[] bytes) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
             sb.append(String.format("%02x", b));
         }
